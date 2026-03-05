@@ -6,4 +6,6 @@
 using namespace std;
 
 void EnviarCaracter(interface_t iface, char dato, unsigned char *mac_src, unsigned char *mac_dst, unsigned char *type);
+
+unsigned char recibirCaracter(interface_t iface);
 #endif
