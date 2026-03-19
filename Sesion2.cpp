@@ -69,28 +69,50 @@ int main()
 
     __fpurge(stdin);
 
-  // cout<<"La MAC destino es: ";
-  // for(int j = 0; j<= 5 ;j++){
-  //    printf("%0X:", mac_dst[j]);
-  // }
-  // printf("%0X\n",mac_dst[5]);
-
   printf("Selección del modo de la estación:\n");
   printf("[1] Modo Maestra\n");
   printf("[2] Modo Esclava\n");
   int modo;
   cin>>modo;
 
+  unsigned char mac_dst[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // MAC de destino por defecto (broadcast)
+  unsigned char type[2] = {0};
+  unsigned char mac_dstEsclava;
+
+  /*Explicación del proceso:NO HE PROBADO NADA AÚN.
+- Primero se muestra al usuario una lista de las interfaces de red disponibles en el sistema, y se le pide que seleccione una.
+- Luego se obtiene la MAC de la interfaz seleccionada y se muestra por pantalla.
+- A continuación, se le pide al usuario que introduzca el número de grupo al que pertenece su estación.
+- Después se abre el puerto de la interfaz seleccionada para poder enviar y recibir paquetes.
+- Finalmente, se le pide al usuario que seleccione el modo de la estación (maestra o esclava), y dependiendo de la selección, se 
+  ejecuta el protocolo de descubrimiento correspondiente.
+- Caso de seleccionar el modo Maestra:
+  - Se construye una trama de descubrimiento con la MAC de origen, la MAC de destino (broadcast) y el tipo correspondiente al número de grupo y a la operación que se está 
+    ejecutando, en este caso sería 01.  
+  - Se envía la trama de descubrimiento.
+  - Se espera a recibir una respuesta de la estación esclava, y si se recibe, se muestra la MAC de la estación esclava por pantalla.
+  - Por último se guarda la MAC de la estación esclava para usarla posteriormente como MAC de destino en los envíos de caracteres.
+- Caso de seleccionar el modo Esclava:
+  - Se espera a recibir una trama de descubrimiento de la estación maestra, viendo si coincide el numero de grupo de las tramas que se reciben 
+    con el que se ha introducido.
+  - Si se recibe una trama de descubrimiento válida, se muestra la MAC de la estación maestra por pantalla.
+  - Por último se construye una trama de respuesta con la MAC de origen (la esclava, que es la que le interesa a la maestra para saber a quién tendrá 
+    que enviarle los caracteres), la MAC de destino (que es la MAC de la estación maestra que se ha obtenido de la trama recibida) y el tipo correspondiente 
+    al número de grupo y a la operación que se está ejecutando, en este caso sería 02, y se envía.
+  */
+
   switch (modo)
   {
   case 1://MAESTRO
-     unsigned char mac_dst[6]={0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0FF};
-     unsigned char type[2]={0x30,0x01};
-   protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst);
-    
+    type[0] = (unsigned char)(0x30 + numGrupo);
+    type[1] = 0x01;
+    mac_dstEsclava = protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type);
+    type[1] = 0x00;
     break;
   case 2://ESCLAVO
-
+    type[0] = (unsigned char)(0x30 + numGrupo);
+    type[1] = 0x02;
+    protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src, type, numGrupo);
     break;
   }
 
