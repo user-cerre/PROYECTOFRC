@@ -8,6 +8,7 @@
 #include <iostream>
 #include "linkLayer.h"
 #include "gestionPuerto.h"
+#include "funcionesTramas.h"
 
 
 using namespace std;
@@ -15,14 +16,11 @@ using namespace std;
 int main()
 {
   char car;
-  unsigned char mac_dst[6]={0x00, 0x00, 0x00, 0x00,0x00, 0x00};
-  unsigned char type[2]={0x30,0x00};
  
 
   printf("\n----------------------------\n");
   printf("------ SESION 2 - FRC ------\n");
   printf("----------------------------\n");
-
   interface_t iface;
   pcap_if_t *avail_ifaces=NULL;
   pcap_if *Lista = GetAvailAdapters();
@@ -34,7 +32,7 @@ int main()
       i++;
       aux = aux->next;
   }
-  cout<<"Seleccione una opcion comprendida entre 0 y "<<i-1<<":"<<endl;
+  cout<<"Seleccione interfaz:"<<endl;
   cin>>seleccion;
   for(int j = 0; j< seleccion; j++){
       Lista= Lista->next;
@@ -46,20 +44,15 @@ int main()
   setDeviceName(&interfazSeleccionada,Lista->name);
   GetMACAdapter(&interfazSeleccionada);
   //Guardamos en mac_src la MAC de la interfaz seleccionada
-  cout<<"La MAC origen es: ";
+  cout<<"La MAC es: ";
   for(int j = 0; j<= 5 ;j++){
      printf("%0X:", mac_src[j]);
   }
   printf("%0X\n",mac_src[5]);
 
-  cout<<"La MAC destino es: ";
-  for(int j = 0; j<= 5 ;j++){
-     printf("%0X:", mac_dst[j]);
-  }
-  printf("%0X\n",mac_dst[5]);
-
-  //Estos dos bucles simplemente se encargan de mostrar por pantalla la MAC origen y
-  //la mac destino respectivamente EN HEXADECIMAL.
+  printf("Introduzca el número de grupo: ");
+  int numGrupo;
+  cin>>numGrupo;
 
   //Abrimos el puerto de la MAC seleccionada para poder enviar los paquetes 
   int Puerto=OpenAdapter(&interfazSeleccionada);
@@ -70,10 +63,39 @@ int main()
         getch();
         return (1);
     }
-  else
+  else{
     printf("Puerto abierto correctamente\n");
+  }
 
     __fpurge(stdin);
+
+  // cout<<"La MAC destino es: ";
+  // for(int j = 0; j<= 5 ;j++){
+  //    printf("%0X:", mac_dst[j]);
+  // }
+  // printf("%0X\n",mac_dst[5]);
+
+  printf("Selección del modo de la estación:\n");
+  printf("[1] Modo Maestra\n");
+  printf("[2] Modo Esclava\n");
+  int modo;
+  cin>>modo;
+
+  switch (modo)
+  {
+  case 1://MAESTRO
+     unsigned char mac_dst[6]={0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0FF};
+     unsigned char type[2]={0x30,0x01};
+   protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst);
+    
+    break;
+  case 2://ESCLAVO
+
+    break;
+  }
+
+  //Estos dos bucles simplemente se encargan de mostrar por pantalla la MAC origen y
+  //la mac destino respectivamente EN HEXADECIMAL.
     printf("Pulse los caracteres a enviar:\n");
 
     //Este while se encarga de leer por teclado los caracteres que el usuario desea 
