@@ -106,7 +106,7 @@ int main()
   case 1://MAESTRO
     type[0] = (unsigned char)(0x30 + numGrupo);
     type[1] = 0x01;
-    mac_dstEsclava = protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type);
+    mac_dstEsclava = protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type, numGrupo);
     type[1] = 0x00;
     break;
   case 2://ESCLAVO
