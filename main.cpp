@@ -48,8 +48,7 @@ int main()
   for(int j = 0; j<= 5 ;j++){
      printf("%0X:", mac_src[j]);
   }
-  printf("%0X\n",mac_src[5]);
-
+  cout<<endl;
   printf("Introduzca el número de grupo: ");
   int numGrupo;
   cin>>numGrupo;
