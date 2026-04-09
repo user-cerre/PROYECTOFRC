@@ -14,7 +14,7 @@ unsigned char  recibirCaracter(interface_t iface){
     const unsigned char *payload = d.packet;
     if (d.packet != nullptr){
         payload = d.packet + 14;
-        cout<<"Caracteres enviados: "<< 1 <<endl;
+        cout<<"Caracteres enviados: "<< "TODO" <<endl;
         return payload[0];
     }else{
         return 0;

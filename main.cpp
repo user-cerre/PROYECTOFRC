@@ -17,7 +17,6 @@ int main()
 {
   char car;
  
-
   printf("\n----------------------------\n");
   printf("------ SESION 2 - FRC ------\n");
   printf("----------------------------\n");
@@ -77,8 +76,9 @@ int main()
   unsigned char mac_dst[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // MAC de destino por defecto (broadcast)
   unsigned char type[2] = {0};
   unsigned char mac_dstEsclava;
+  unsigned char mac_dstMaestra;
 
-  /*Explicación del proceso:NO HE PROBADO NADA AÚN.
+  /*Explicación del proceso:
 - Primero se muestra al usuario una lista de las interfaces de red disponibles en el sistema, y se le pide que seleccione una.
 - Luego se obtiene la MAC de la interfaz seleccionada y se muestra por pantalla.
 - A continuación, se le pide al usuario que introduzca el número de grupo al que pertenece su estación.
@@ -106,13 +106,51 @@ int main()
     type[0] = (unsigned char)(0x30 + numGrupo);
     type[1] = 0x01;
     mac_dstEsclava = protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type, numGrupo);
-    type[1] = 0x00;
     break;
   case 2://ESCLAVO
     type[0] = (unsigned char)(0x30 + numGrupo);
     type[1] = 0x02;
-    protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src, type, numGrupo);
+    mac_dstMaestra = protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src, type, numGrupo);
     break;
+  }
+
+  type[1] = 0x00; //Tipo para el envío de caracteres, que es diferente al tipo usado para el descubrimiento, por eso se pone a 0.
+
+  printf("Selección de Modo: \n");
+  printf("[F1] - Envío de caracteres interactivo\n");
+  if(modo == 1){
+    printf("[F2] - Envío de un fichero\n");
+  }
+  printf("[ESC] - Salir\n");
+
+  while(car != 27){
+    if(kbhit()){
+      car = getch();
+      if(car != 27){
+        printf("La tecla pulsada no es válida. Por favor, pulse una de las teclas indicadas en el menú.\n");
+      } else{
+        if(kbhit()){
+          car = getch();
+          if(car == 'O'){
+            car = getch();
+            switch (car){
+              case 'P':
+                
+              break;
+              case 'Q':
+
+              break;
+              case 'R':
+              //TODO: Tecla F3 aún no usada
+              break;
+              case 'S':
+              //TODO: Tecla F4 aún no usada
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   //Estos dos bucles simplemente se encargan de mostrar por pantalla la MAC origen y

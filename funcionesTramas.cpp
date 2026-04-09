@@ -27,7 +27,7 @@ unsigned char protocoloDescubrimientoMaestra(interface_t *iface, unsigned char *
     return *esclava;
 }
 
-void protocoloDescubrimientoEsclava(interface_t *iface, unsigned char *mac_src, unsigned char *type, int numGrupo){
+unsigned char protocoloDescubrimientoEsclava(interface_t *iface, unsigned char *mac_src, unsigned char *type, int numGrupo){
     printf("Esperando que se una la estación maestra...\n");
     apacket_t d = ReceiveFrame(iface);
     bool contestacionMaestra = false;
@@ -56,4 +56,6 @@ void protocoloDescubrimientoEsclava(interface_t *iface, unsigned char *mac_src, 
 
     unsigned char * frame = BuildHeader(mac_src, mac_dst, type);
     SendFrame(iface, frame, 0);
+
+    return *maestra;
 }
