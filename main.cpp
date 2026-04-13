@@ -17,6 +17,7 @@ int main()
 {
   char car;
  
+
   printf("\n----------------------------\n");
   printf("------ SESION 2 - FRC ------\n");
   printf("----------------------------\n");
@@ -73,10 +74,12 @@ int main()
   int modo;
   cin>>modo;
 
-  unsigned char mac_dst[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // MAC de destino por defecto (broadcast)
-  unsigned char type[2] = {0};
-  unsigned char mac_dstEsclava;
-  unsigned char mac_dstMaestra;
+  //FIN DEL PROCESO DE INICIALIZACIÓN, AHORA SE EJECUTARÁ EL PROTOCOLO DE DESCUBRIMIENTO DEPENDIENDO DEL MODO SELECCIONADO POR EL USUARIO.
+
+  unsigned char mac_dst[6];
+  unsigned char type[2] = {0, 0}; // Tipo de trama, se construirá a partir del número de grupo y la operación que se está ejecutando.
+  
+  type[0] = (unsigned char)(0x30 + numGrupo); // El primer byte del tipo se construye a partir del número de grupo, sumándole 0x30 para que quede en el rango de tipos personalizados (0x3000 - 0x3FFF).
 
   /*Explicación del proceso:
 - Primero se muestra al usuario una lista de las interfaces de red disponibles en el sistema, y se le pide que seleccione una.
@@ -103,14 +106,13 @@ int main()
   switch (modo)
   {
   case 1://MAESTRO
-    type[0] = (unsigned char)(0x30 + numGrupo);
     type[1] = 0x01;
-    mac_dstEsclava = protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type, numGrupo);
+    protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type, numGrupo);
     break;
   case 2://ESCLAVO
-    type[0] = (unsigned char)(0x30 + numGrupo);
     type[1] = 0x02;
-    mac_dstMaestra = protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src, type, numGrupo);
+    protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src,mac_dst, type, numGrupo);
+    //NECESITAMOS GUARDAR LA MAC
     break;
   }
 
@@ -153,6 +155,46 @@ int main()
     }
   }
 
+  type[1] = 0x00; //Tipo para el envío de caracteres, que es diferente al tipo usado para el descubrimiento, por eso se pone a 0.
+
+  printf("Selección de Modo: \n");
+  printf("[F1] - Envío de caracteres interactivo\n");
+  if(modo == 1){
+    printf("[F2] - Envío de un fichero\n");
+  }
+  printf("[ESC] - Salir\n");
+
+  while(car != 27){
+    if(kbhit()){
+      car = getch();
+      if(car != 27){
+        printf("La tecla pulsada no es válida. Por favor, pulse una de las teclas indicadas en el menú.\n");
+      } else{
+        if(kbhit()){
+          car = getch();
+          if(car == 'O'){
+            car = getch();
+            switch (car){
+              case 'P':
+                
+              break;
+              case 'Q':
+
+              break;
+              case 'R':
+              //TODO: Tecla F3 aún no usada
+              break;
+              case 'S':
+              //TODO: Tecla F4 aún no usada
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  type[1] = 0x00;
   //Estos dos bucles simplemente se encargan de mostrar por pantalla la MAC origen y
   //la mac destino respectivamente EN HEXADECIMAL.
     printf("Pulse los caracteres a enviar:\n");
@@ -169,7 +211,7 @@ int main()
       if(kbhit()){
         car = getch();
         if(car != 27){
-          EnviarCaracter(interfazSeleccionada,car,mac_src,mac_dst,type);
+          enviarCaracter(interfazSeleccionada,car,mac_src,mac_dst,type);
         }
       }
     }
