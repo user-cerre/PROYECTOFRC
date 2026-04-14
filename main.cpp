@@ -14,12 +14,16 @@
 using namespace std;
 
 int main(){
-  char car = 0;
+  int numGrupo;
+  int modo = 0;
   interface_t iface;
   pcap_if_t *avail_ifaces=nullptr;
   pcap_if *Lista = GetAvailAdapters();
   pcap_if *aux = Lista;
-  unsigned char mac_dst[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+  unsigned char *mac_src;
+  unsigned char mac_dstEsclava;
+  unsigned char mac_dstMaestra;
+  unsigned char mac_dst[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //dirección de Broadcast
   unsigned char type[2] = {0x30, 0x30};
   int i = 0;
 
@@ -41,53 +45,50 @@ int main(){
   }else if (seleccion < i){
     i = 0;
     bool enc = false;
-    while (aux != nullptr){
+    while (aux != nullptr && !enc){
       if (seleccion == i){
         enc = true;
         cout<< "Intefaz elegida: "<<aux->name<<endl;
+        mac_src = iface.MACaddr;
         setDeviceName(&iface, aux->name);
         GetMACAdapter(&iface);
         cout<< "La MAC seleccionada es: ";
-        for (int j = 0; j < 6; i++){
+        for (int j = 0; j < 6; j++){
           if( j < 5){
-            printf("%02X:", iface.MACaddr[i]);
+            printf("%02X:", mac_src[j]);
           }else{
-            printf("%02X\n", iface.MACaddr[i]);
+            printf("%02X\n", mac_src[j]);
           }
         }
         cout<<endl;
-        printf("Introduzca el número de grupo: ");
-        int numGrupo;
-        cin>>numGrupo;
-        type[0]= numGrupo +48;
       }else{
         aux = aux->next;
         i++;
       }
     }
+
+    printf("Introduzca el número de grupo: ");
+    cin>>numGrupo;
+    type[0] = (unsigned char)(0x30 + numGrupo);
+
     if (OpenAdapter(&iface) == 0){
       printf("Puerto abierto correctamente\n");
       printf("Selección del modo de la estación:\n");
       printf("[1] Modo Maestra\n");
       printf("[2] Modo Esclava\n");
-      int modo;
       cin>> modo;
       switch (modo)
       {
       case 1://MAESTRO
         type[1] = 0x01;
-        protocoloDescubrimientoMaestra(&iface, mac_src, mac_dst, type, numGrupo);
-        type[1] = 0x00;
+        conexionDesdeMaestra(&iface, mac_dst, type, numGrupo);
         break;
       case 2://ESCLAVO
         type[1] = 0x02;
-        protocoloDescubrimientoEsclava(&iface, mac_src,mac_dst, type, numGrupo);
-        //NECESITAMOS GUARDAR LA MAC
-        type[1] = 0x00;
+        conexionDesdeEsclava(&iface, type, numGrupo);
         break;
-      default:
-        type[1] = 0x00;
-      }
+        }
+       type[1] = 0x00;
     }else{
       cout<<"Error al intentar abrir el puerto"<<endl;
     }
@@ -95,13 +96,13 @@ int main(){
     cout<<"Error en la selección de la interfaz"<<endl;
   }
   cout<<endl;
-  return 0;//HASTA AQUÍ ES LA IMPLEMENTACIÓN SUGERIDA.
-  //ES NECESARIO HACER MÚLTIPLES CAMBIOS EN LASFUNCIONES DE TRAMAS A LA VEZ QUE 
-  //DEBEMOS AVERIGUAR EL FALLO QUE HAY EN GESTIONPUERTO.CPP
+  
+  //Cerramos el puerto:
+  CloseAdapter(&iface);
+  printf("Puerto cerrado\n");
 
-
-  //Abrimos el puerto de la MAC seleccionada para poder enviar los paquetes 
-  //FIN DEL PROCESO DE INICIALIZACIÓN, AHORA SE EJECUTARÁ EL PROTOCOLO DE DESCUBRIMIENTO DEPENDIENDO DEL MODO SELECCIONADO POR EL USUARIO.
+  return 0;
+}
 
   /*Explicación del proceso:
 - Primero se muestra al usuario una lista de las interfaces de red disponibles en el sistema, y se le pide que seleccione una.
@@ -124,114 +125,3 @@ int main(){
     que enviarle los caracteres), la MAC de destino (que es la MAC de la estación maestra que se ha obtenido de la trama recibida) y el tipo correspondiente 
     al número de grupo y a la operación que se está ejecutando, en este caso sería 02, y se envía.
   */
-
-/*
-
-  type[1] = 0x00; //Tipo para el envío de caracteres, que es diferente al tipo usado para el descubrimiento, por eso se pone a 0.
-
-  printf("Selección de Modo: \n");
-  printf("[F1] - Envío de caracteres interactivo\n");
-  if(modo == 1){
-    printf("[F2] - Envío de un fichero\n");
-  }
-  printf("[ESC] - Salir\n");
-
-  while(car != 27){
-    if(kbhit()){
-      car = getch();
-      if(car != 27){
-        printf("La tecla pulsada no es válida. Por favor, pulse una de las teclas indicadas en el menú.\n");
-      } else{
-        if(kbhit()){
-          car = getch();
-          if(car == 'O'){
-            car = getch();
-            switch (car){
-              case 'P':
-                
-              break;
-              case 'Q':
-
-              break;
-              case 'R':
-              //TODO: Tecla F3 aún no usada
-              break;
-              case 'S':
-              //TODO: Tecla F4 aún no usada
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  type[1] = 0x00; //Tipo para el envío de caracteres, que es diferente al tipo usado para el descubrimiento, por eso se pone a 0.
-
-  printf("Selección de Modo: \n");
-  printf("[F1] - Envío de caracteres interactivo\n");
-  if(modo == 1){
-    printf("[F2] - Envío de un fichero\n");
-  }
-  printf("[ESC] - Salir\n");
-
-  while(car != 27){
-    if(kbhit()){
-      car = getch();
-      if(car != 27){
-        printf("La tecla pulsada no es válida. Por favor, pulse una de las teclas indicadas en el menú.\n");
-      } else{
-        if(kbhit()){
-          car = getch();
-          if(car == 'O'){
-            car = getch();
-            switch (car){
-              case 'P':
-                
-              break;
-              case 'Q':
-
-              break;
-              case 'R':
-              //TODO: Tecla F3 aún no usada
-              break;
-              case 'S':
-              //TODO: Tecla F4 aún no usada
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  type[1] = 0x00;
-  //Estos dos bucles simplemente se encargan de mostrar por pantalla la MAC origen y
-  //la mac destino respectivamente EN HEXADECIMAL.
-    printf("Pulse los caracteres a enviar:\n");
-
-    //Este while se encarga de leer por teclado los caracteres que el usuario desea 
-    // enviar, y a su vez, también se encarga de recibir los caracteres que le lleguen
-    // a la interfaz seleccionada. El bucle se mantendrá activo hasta que el usuario pulse
-    // la tecla ESC (carácter 27 en ASCII).
-    while(car != 27){
-      car = recibirCaracter(&interfazSeleccionada);
-      if(car){
-        printf("Recibido el carácter: %c\n",car);
-      }
-      if(kbhit()){
-        car = getch();
-        if(car != 27){
-          enviarCaracter(&interfazSeleccionada,car,mac_src,mac_dst,type);
-        }
-      }
-    }
-
-  //Cerramos el puerto:
-  CloseAdapter(&interfazSeleccionada);
-  printf("Puerto cerrado\n");
-
-
-  return 0;
-}
-*/

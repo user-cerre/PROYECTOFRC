@@ -1,7 +1,7 @@
 #include "gestionPuerto.h"
 
 void enviarCaracter(interface_t *iface, char dato, unsigned char *mac_src, unsigned char *mac_dst, unsigned char *type){
-    unsigned char *payload = (unsigned char *)malloc(sizeof(char));
+    unsigned char *payload = (unsigned char *)malloc(sizeof(unsigned char));
     //Almacenamos el carácter a enviar en el payload de la trama, que en este caso será un único byte.
     payload[0] = dato;
 
@@ -30,18 +30,18 @@ int recibirCaracter(interface_t *iface){
 }
 
 void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *type){
-ifstream file("envio.txt");
-char cadena[254];
-unsigned char *trama;
-if(file.is_open()){
-    while (!file.eof()){
-        file.read(cadena, 254);
-        if(file.gcount()!= 0){
-            cadena[file.gcount()]= '\0';
-            trama = BuildFrame(iface.MACaddr, mac_dst, type, cadena);
-            SendFrame(&iface, trama, file.gcount());
+    ifstream file("envio.txt");
+    char texto[254];
+    unsigned char *trama;
+    if(file.is_open()){
+        while (!file.eof()){
+            file.read(texto, 254);
+            if(file.gcount()!= 0){
+                texto[file.gcount()]= '\0';
+                trama = BuildFrame(iface.MACaddr, mac_dst, type, (unsigned char *)texto);
+                SendFrame(&iface, trama, file.gcount());
+            }
         }
+        file.close();
     }
-    file.close();
-    
 }
