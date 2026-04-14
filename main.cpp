@@ -13,73 +13,95 @@
 
 using namespace std;
 
-int main()
-{
-  char car;
- 
-
-  printf("\n----------------------------\n");
-  printf("------ SESION 2 - FRC ------\n");
-  printf("----------------------------\n");
+int main(){
+  char car = 0;
   interface_t iface;
-  pcap_if_t *avail_ifaces=NULL;
+  pcap_if_t *avail_ifaces=nullptr;
   pcap_if *Lista = GetAvailAdapters();
   pcap_if *aux = Lista;
+  unsigned char mac_dst[6] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+  unsigned char type[2] = {0x30, 0x30};
   int i = 0;
-  int seleccion;
+
+  printf("\n----------------------------\n");
+  printf("------ SESION 3 - FRC ------\n");
+  printf("----------------------------\n");
+  
   while (aux->next != NULL){
       cout<<"["<<i<<"]"<<" "<<aux->name<<endl;
-      i++;
       aux = aux->next;
+      i++;
   }
   cout<<"Seleccione interfaz:"<<endl;
+  aux = Lista;
+  int seleccion;
   cin>>seleccion;
-  for(int j = 0; j< seleccion; j++){
-      Lista= Lista->next;
-  }
-  cout<<"Interfaz Elegida: "<<Lista->name<<endl;
-  //Hasta aquí simplemente estamos dando al usuario que elija la interfaz de red que desea usar para enviar los paquetes. Ahora vamos a obtener la MAC de esa interfaz y mostrarla por pantalla, así como la MAC destino que hemos definido al principio del programa.
-  interface_t interfazSeleccionada;
-  unsigned char *mac_src = interfazSeleccionada.MACaddr;
-  setDeviceName(&interfazSeleccionada,Lista->name);
-  GetMACAdapter(&interfazSeleccionada);
-  //Guardamos en mac_src la MAC de la interfaz seleccionada
-  cout<<"La MAC es: ";
-  for(int j = 0; j<= 5 ;j++){
-     printf("%0X:", mac_src[j]);
+  if(cin.fail()){
+    cout<<"Error al seleccionar la interfaz"<<endl;
+  }else if (seleccion < i){
+    i = 0;
+    bool enc = false;
+    while (aux != nullptr){
+      if (seleccion == i){
+        enc = true;
+        cout<< "Intefaz elegida: "<<aux->name<<endl;
+        setDeviceName(&iface, aux->name);
+        GetMACAdapter(&iface);
+        cout<< "La MAC seleccionada es: ";
+        for (int j = 0; j < 6; i++){
+          if( j < 5){
+            printf("%02X:", iface.MACaddr[i]);
+          }else{
+            printf("%02X\n", iface.MACaddr[i]);
+          }
+        }
+        cout<<endl;
+        printf("Introduzca el número de grupo: ");
+        int numGrupo;
+        cin>>numGrupo;
+        type[0]= numGrupo +48;
+      }else{
+        aux = aux->next;
+        i++;
+      }
+    }
+    if (OpenAdapter(&iface) == 0){
+      printf("Puerto abierto correctamente\n");
+      printf("Selección del modo de la estación:\n");
+      printf("[1] Modo Maestra\n");
+      printf("[2] Modo Esclava\n");
+      int modo;
+      cin>> modo;
+      switch (modo)
+      {
+      case 1://MAESTRO
+        type[1] = 0x01;
+        protocoloDescubrimientoMaestra(&iface, mac_src, mac_dst, type, numGrupo);
+        type[1] = 0x00;
+        break;
+      case 2://ESCLAVO
+        type[1] = 0x02;
+        protocoloDescubrimientoEsclava(&iface, mac_src,mac_dst, type, numGrupo);
+        //NECESITAMOS GUARDAR LA MAC
+        type[1] = 0x00;
+        break;
+      default:
+        type[1] = 0x00;
+      }
+    }else{
+      cout<<"Error al intentar abrir el puerto"<<endl;
+    }
+  }else{
+    cout<<"Error en la selección de la interfaz"<<endl;
   }
   cout<<endl;
-  printf("Introduzca el número de grupo: ");
-  int numGrupo;
-  cin>>numGrupo;
+  return 0;//HASTA AQUÍ ES LA IMPLEMENTACIÓN SUGERIDA.
+  //ES NECESARIO HACER MÚLTIPLES CAMBIOS EN LASFUNCIONES DE TRAMAS A LA VEZ QUE 
+  //DEBEMOS AVERIGUAR EL FALLO QUE HAY EN GESTIONPUERTO.CPP
+
 
   //Abrimos el puerto de la MAC seleccionada para poder enviar los paquetes 
-  int Puerto=OpenAdapter(&interfazSeleccionada);
-
-  if(Puerto != 0)
-    {
-        printf("Error al abrir el puerto\n");
-        getch();
-        return (1);
-    }
-  else{
-    printf("Puerto abierto correctamente\n");
-  }
-
-    __fpurge(stdin);
-
-  printf("Selección del modo de la estación:\n");
-  printf("[1] Modo Maestra\n");
-  printf("[2] Modo Esclava\n");
-  int modo;
-  cin>>modo;
-
   //FIN DEL PROCESO DE INICIALIZACIÓN, AHORA SE EJECUTARÁ EL PROTOCOLO DE DESCUBRIMIENTO DEPENDIENDO DEL MODO SELECCIONADO POR EL USUARIO.
-
-  unsigned char mac_dst[6];
-  unsigned char type[2] = {0, 0}; // Tipo de trama, se construirá a partir del número de grupo y la operación que se está ejecutando.
-  
-  type[0] = (unsigned char)(0x30 + numGrupo); // El primer byte del tipo se construye a partir del número de grupo, sumándole 0x30 para que quede en el rango de tipos personalizados (0x3000 - 0x3FFF).
 
   /*Explicación del proceso:
 - Primero se muestra al usuario una lista de las interfaces de red disponibles en el sistema, y se le pide que seleccione una.
@@ -103,18 +125,7 @@ int main()
     al número de grupo y a la operación que se está ejecutando, en este caso sería 02, y se envía.
   */
 
-  switch (modo)
-  {
-  case 1://MAESTRO
-    type[1] = 0x01;
-    protocoloDescubrimientoMaestra(&interfazSeleccionada, mac_src, mac_dst, type, numGrupo);
-    break;
-  case 2://ESCLAVO
-    type[1] = 0x02;
-    protocoloDescubrimientoEsclava(&interfazSeleccionada, mac_src,mac_dst, type, numGrupo);
-    //NECESITAMOS GUARDAR LA MAC
-    break;
-  }
+/*
 
   type[1] = 0x00; //Tipo para el envío de caracteres, que es diferente al tipo usado para el descubrimiento, por eso se pone a 0.
 
@@ -204,14 +215,14 @@ int main()
     // a la interfaz seleccionada. El bucle se mantendrá activo hasta que el usuario pulse
     // la tecla ESC (carácter 27 en ASCII).
     while(car != 27){
-      car = recibirCaracter(interfazSeleccionada);
+      car = recibirCaracter(&interfazSeleccionada);
       if(car){
         printf("Recibido el carácter: %c\n",car);
       }
       if(kbhit()){
         car = getch();
         if(car != 27){
-          enviarCaracter(interfazSeleccionada,car,mac_src,mac_dst,type);
+          enviarCaracter(&interfazSeleccionada,car,mac_src,mac_dst,type);
         }
       }
     }
@@ -223,3 +234,4 @@ int main()
 
   return 0;
 }
+*/

@@ -2,32 +2,38 @@
 
 
 void protocoloDescubrimientoMaestra(interface_t *iface, unsigned char *mac_src, unsigned char *mac_dst, unsigned char *type, int numGrupo){
-    unsigned char broadcast[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-    unsigned char * frame = BuildHeader(mac_src, broadcast, type);
-    SendFrame(iface, frame, 0);
-
-    printf("Esperando que se una la estación esclava...\n");
-    
-    apacket_t d;
     bool contestacionEsclava = false;
-
+    apacket_t d;
+    unsigned char mac_dst[6];
+    printf("Esperando que se una la estación esclava...\n");
     while(!contestacionEsclava){ 
         d = ReceiveFrame(iface);
-        if(d.packet == nullptr){
-            continue;
+        if(d.packet != nullptr){
+            if ( d.packet[12] == type[0]){
+                if (d.packet[13] == type[1]){
+                    contestacionEsclava = true;
+                    for(int i = 0; i < 6; i++){
+                        mac_dst[i] = d.packet[i + 6]; //mac_dst se llena con la MAC de destino de la trama recibida, que es la MAC de la estación esclava.
+                    }
+                    unsigned char *frame = BuildHeader(iface->MACaddr, mac_dst, type);
+                    SendFrame(iface, frame, 0);
+                    printf("Estación encontrada. La MAC es: ");
+                    for(int j = 0; j < 6 ; j++){
+                        if (j < 5){
+                            printf("%02X:", d.packet[j+6]);
+                        } else {
+                            printf("%02X", d.packet[j+6]);
+                        }
+                    }
+                    printf("\n");
+                    cout<< "Selleccione el modo de envío de caracteres: "<<endl;
+                    cout<< "[F1] Envío de caracteres por teclado"<<endl;
+                    //AQUÍ LLAMA A LA INTERACTIVIDAD DEL ESCLAVO
+                }
+            }
         }
-        if(d.packet[12] == (unsigned char)(0x30 + numGrupo) && d.packet[13] == 0x02){
-            contestacionEsclava = true;
-        }
     }
-    for(int i = 0; i < 6; i++){
-        mac_dst[i] = d.packet[i + 6]; //mac_dst se llena con la MAC de destino de la trama recibida, que es la MAC de la estación esclava.
-    }
-    printf("Estación encontrada. La MAC es: ");
-    for(int j = 0; j < 6 ; j++){
-        printf("%02X%c", mac_dst[j], (j < 5) ? ':' : '\n');
-    }
-    printf("\n");
+    
 }
 
 void protocoloDescubrimientoEsclava(interface_t *iface, unsigned char *mac_src,unsigned char *mac_dst, unsigned char *type, int numGrupo){
@@ -56,6 +62,12 @@ void protocoloDescubrimientoEsclava(interface_t *iface, unsigned char *mac_src,u
     printf("\n");
     unsigned char *frame = BuildHeader(mac_src, mac_dst, type);
     SendFrame(iface, frame, 0);
+}
 
-    return *maestra;
+void respuesta(interface_t *iface, unsigned char *type){
+    
+}
+
+void respuestaEsclava(interface_t *iface, unsigned char *type){
+    
 }
