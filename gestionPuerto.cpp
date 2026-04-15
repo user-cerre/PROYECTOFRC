@@ -17,7 +17,6 @@ void enviarCaracter(interface_t *iface, char dato, unsigned char *mac_src, unsig
 int recibirCaracter(interface_t *iface){
     apacket_t d  = ReceiveFrame(iface);
     int i = 14;
-    const unsigned char *payload = d.packet;
     //Si hay algo en el payload de la trama recibida, lo devolvemos como carácter recibido. En caso contrario, devolvemos 0 para indicar que no se ha recibido ningún carácter.
     if (d.packet != nullptr && d.packet[14] > 0){
         while(i < d.header.len){

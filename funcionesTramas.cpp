@@ -3,17 +3,16 @@
 void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
     char caracter = 0;
     int numCaracteres = 0;
-    while(caracter != 27){
-        if(kbhit()){
+    while(caracter != 27){//Mientras no se pulse ESC
+        if(kbhit()){//Si se ha pulsado una tecla
             caracter = getch();
-            if(caracter != 27){
+            if(caracter != 27){//Si no se ha pulsado ESC, se envía el carácter introducido
                 enviarCaracter(iface, caracter, iface->MACaddr, mac_dst, type);
             }
-        } else{
-            numCaracteres = recibirCaracter(iface);
-            if(numCaracteres != 0){
-                cout << "Se han recibido " << numCaracteres << " caracteres" << endl;
-            }
+        }
+        numCaracteres = recibirCaracter(iface);
+        if(numCaracteres != 0){
+            cout << "Se han recibido " << numCaracteres << " caracteres" << endl;
         }
     }
 }
@@ -24,8 +23,8 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
     printf("[F2] - Envío de fichero\n ");
     printf("ESC - Salir\n ");
     char car = 0;
-    while (car != 27){
-        if(kbhit()){
+    while (car != 27){//Mientras no se pulse ESC
+        if(kbhit()){//Si se ha pulsado una tecla
             car = getch();
             if(car == 27){
                 if(kbhit()){
@@ -74,7 +73,7 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
                             case 'P':
                                 printf("Has elegido Envío de caracteres interactivo\n ");
                                 envioInteractivoCaracteres(iface, mac_dst, type);
-                            break;
+                                break;
                             }
                         }
                     }
@@ -87,7 +86,9 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
             cout << "Recibidos: " << valor << " caracteres" << endl;
         }
     }
-    cout << "Tamaño del fichero: " << contador << endl;
+    if(contador != 0){
+        cout << "Tamaño del fichero: " << contador << endl;
+    }
 }
 
 void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
@@ -111,7 +112,7 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
 
     printf("Estación encontrada. La MAC es: ");
     int i = 0;
-    for(int j = 6; j<= 11 ;j++){
+    for(int j = 6; j<= 11 ;j++){//Empieza en 6 porque los primeros 6 bytes de la trama son la MAC destino, y los siguientes 6 bytes (del 6 al 11) son la MAC origen, que es la que nos interesa para enviarle las tramas a la estación esclava.
         if(j < 11){
             printf("%02X:", esclava[j]);
         }else{
@@ -125,8 +126,7 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
 }
 
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo){
-    printf("Esperando que se una la estación maestra...\n");
-    apacket_t d = ReceiveFrame(iface);
+    apacket_t d;
     bool contestacionMaestra = false;
     
     while(!contestacionMaestra){

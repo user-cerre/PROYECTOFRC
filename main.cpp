@@ -60,6 +60,9 @@ int main(){
             printf("%02X\n", mac_src[j]);
           }
         }
+        printf("Introduzca el número de grupo: ");
+        cin>>numGrupo;
+        type[0] = (unsigned char)(0x30 + numGrupo);
         cout<<endl;
       }else{
         aux = aux->next;
@@ -67,9 +70,7 @@ int main(){
       }
     }
 
-    printf("Introduzca el número de grupo: ");
-    cin>>numGrupo;
-    type[0] = (unsigned char)(0x30 + numGrupo);
+
 
     if (OpenAdapter(&iface) == 0){
       printf("Puerto abierto correctamente\n");
