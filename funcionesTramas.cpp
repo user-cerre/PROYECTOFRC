@@ -83,10 +83,10 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
         valor = recibirCaracter(iface);
         contador += valor;
         if(valor != 0){
-            cout << "Recibidos: " << valor << " caracteres" << endl;
+            cout << "Nº de caracteres: " << valor << endl;
         }
     }
-    if(contador != 0){
+    if(contador > 1000){    //Si se han recibido más de 1000 caracteres, se asume que se ha enviado un fichero, y se muestra el tamaño del fichero recibido.
         cout << "Tamaño del fichero: " << contador << endl;
     }
 }
@@ -126,6 +126,7 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
 }
 
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo){
+    printf("Esperando que se una la estación maestra...\n");
     apacket_t d;
     bool contestacionMaestra = false;
     
