@@ -1,3 +1,10 @@
+/**
+ * Autores:
+ * - Eduardo Cabello Gil
+ * - Carlos Paredes Ruiz
+ * Grupo de prácticas: Grupo 8 -- Jueves 10:00 - 11:30 h.
+ */
+
 #include <stdio.h>
 #include <iostream>
 #include <fstream>

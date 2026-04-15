@@ -1,3 +1,10 @@
+/**
+ * Autores:
+ * - Eduardo Cabello Gil
+ * - Carlos Paredes Ruiz
+ * Grupo de prácticas: Grupo 8 -- Jueves 10:00 - 11:30 h.
+ */
+
 #include "funcionesTramas.h"
 
 void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
@@ -18,7 +25,7 @@ void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsi
 }
 
 void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
-    printf("Selecciona el modo de la estación:\n ");
+    printf("Seleccione opción:\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("[F2] - Envío de fichero\n ");
     printf("ESC - Salir\n ");
@@ -53,7 +60,7 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
 }
 
 void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
-    printf("Selecciona el modo de la estación:\n ");
+    printf("Seleccione opción\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("ESC - Salir\n ");
     char car = 0;

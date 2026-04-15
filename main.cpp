@@ -1,8 +1,15 @@
-  //============================================================================
+//============================================================================
 // ----------- PRACTICAS DE FUNDAMENTOS DE REDES DE COMUNICACIONES -----------
 // ---------------------------- CURSO 2025/26 --------------------------------
-// ----------------------------- SESION2.CPP ---------------------------------
 //============================================================================
+
+/**
+ * Autores:
+ * - Eduardo Cabello Gil
+ * - Carlos Paredes Ruiz
+ * Grupo de prácticas: Grupo 8 -- Jueves 10:00 - 11:30 h.
+ */
+
 #include <stdio.h>
 #include <stdio_ext.h>
 #include <iostream>
@@ -30,6 +37,8 @@ int main(){
   printf("\n----------------------------\n");
   printf("------ SESION 3 - FRC ------\n");
   printf("----------------------------\n");
+
+  printf("Interfaces de disponibles:\n");
   
   while (aux->next != NULL){
       cout<<"["<<i<<"]"<<" "<<aux->name<<endl;
@@ -74,7 +83,7 @@ int main(){
 
     if (OpenAdapter(&iface) == 0){
       printf("Puerto abierto correctamente\n");
-      printf("Selección del modo de la estación:\n");
+      printf("Seleccione el modo de la estación:\n");
       printf("[1] Modo Maestra\n");
       printf("[2] Modo Esclava\n");
       cin>> modo;
@@ -117,12 +126,18 @@ int main(){
     ejecutando, en este caso sería 01.  
   - Se envía la trama de descubrimiento.
   - Se espera a recibir una respuesta de la estación esclava, y si se recibe, se muestra la MAC de la estación esclava por pantalla.
-  - Por último se guarda la MAC de la estación esclava para usarla posteriormente como MAC de destino en los envíos de caracteres.
+  - Por último, se da a elegir al usuario si qué es lo que quiere enviar a la estación esclava, si caracteres de forma interactiva o un fichero, 
+    y se ejecuta el protocolo correspondiente para cada caso.
+  
 - Caso de seleccionar el modo Esclava:
   - Se espera a recibir una trama de descubrimiento de la estación maestra, viendo si coincide el numero de grupo de las tramas que se reciben 
     con el que se ha introducido.
   - Si se recibe una trama de descubrimiento válida, se muestra la MAC de la estación maestra por pantalla.
-  - Por último se construye una trama de respuesta con la MAC de origen (la esclava, que es la que le interesa a la maestra para saber a quién tendrá 
+  - A continuación se construye una trama de respuesta con la MAC de origen (la esclava, que es la que le interesa a la maestra para saber a quién tendrá 
     que enviarle los caracteres), la MAC de destino (que es la MAC de la estación maestra que se ha obtenido de la trama recibida) y el tipo correspondiente 
     al número de grupo y a la operación que se está ejecutando, en este caso sería 02, y se envía.
+  - Por último, se da a elegir al usuario sólo la posibilidad de enviar caracteres de forma interactiva o finalizar la conexión. Si el usuario decide la primera opción, 
+    se ejecuta el protocolo correspondiente para ello, que es el mismo que para la estación maestra, pero con la diferencia de que en este caso, cada vez que se recibe una 
+    trama, se muestra por pantalla el número de caracteres recibidos, y al finalizar el envío de caracteres, se muestra por pantalla el tamaño del fichero recibido 
+    (en caso de que la maestra haya enviado un fichero).
   */

@@ -1,3 +1,10 @@
+/**
+ * Autores:
+ * - Eduardo Cabello Gil
+ * - Carlos Paredes Ruiz
+ * Grupo de prácticas: Grupo 8 -- Jueves 10:00 - 11:30 h.
+ */
+
 #include "gestionPuerto.h"
 
 void enviarCaracter(interface_t *iface, char dato, unsigned char *mac_src, unsigned char *mac_dst, unsigned char *type){
@@ -19,6 +26,7 @@ int recibirCaracter(interface_t *iface){
     int i = 14;
     //Si hay algo en el payload de la trama recibida, lo devolvemos como carácter recibido. En caso contrario, devolvemos 0 para indicar que no se ha recibido ningún carácter.
     if (d.packet != nullptr && d.packet[14] > 0){
+        printf("Recibido: ");
         while(i < d.header.len){
             printf("%c", d.packet[i]);
             i++;
