@@ -35,7 +35,7 @@ int main(){
   int i = 0;
 
   printf("\n----------------------------\n");
-  printf("------ SESION 3 - FRC ------\n");
+  printf("------ SESION 4 - FRC ------\n");
   printf("----------------------------\n");
 
   printf("Interfaces de disponibles:\n");

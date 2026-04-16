@@ -1,4 +1,4 @@
-/**
+ /**
  * Autores:
  * - Eduardo Cabello Gil
  * - Carlos Paredes Ruiz
@@ -28,6 +28,7 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
     printf("Seleccione opción:\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("[F2] - Envío de fichero\n ");
+    printf("[F3] - Protocolo de paro y espera\n ");
     printf("ESC - Salir\n ");
     char car = 0;
     while (car != 27){//Mientras no se pulse ESC
@@ -50,6 +51,12 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
                                 printf("Has elegido Envío de fichero\n ");
                                 enviarFichero(*iface, mac_dst, type);
                             break;
+
+                            case 'R':
+                                printf("Has elegido Protocolo de paro y espera\n");
+
+                            break;
+
                             }
                         }
                     }
@@ -62,6 +69,7 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
 void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
     printf("Seleccione opción\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
+    printf("[F3] - Protocolo de paro y espera\n ");
     printf("ESC - Salir\n ");
     char car = 0;
     int contador = 0;
@@ -80,6 +88,10 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
                             case 'P':
                                 printf("Has elegido Envío de caracteres interactivo\n ");
                                 envioInteractivoCaracteres(iface, mac_dst, type);
+                                break;
+                            case 'R':
+                                printf("Has elegido Protocolo de paro y espera\n");
+                                
                                 break;
                             }
                         }
@@ -167,4 +179,8 @@ void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo)
     SendFrame(iface, frame, 0);
 
     gestionMenuEsclava(iface, macDst, type);
+}
+
+unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst){
+    
 }

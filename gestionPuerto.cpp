@@ -52,3 +52,14 @@ void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *typ
         file.close();
     }
 }
+/**
+ * DIreccion es un caracter
+ * COntrol un caracter
+ * Número de trama '0' o '1' como carácter
+ * Longitud un numero entre 1 y 254(el tamaño maximo de la trama)
+ * Campo datos variables
+ * BCE fijo
+ */
+void enviarTramaConErrores(interface_t iface, unsigned char *mac_dst, unsigned char *type){
+
+}

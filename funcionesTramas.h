@@ -53,4 +53,11 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
  */
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo);
 
+/** 
+ * @brief Calcula la trama BCE
+ * @param iface iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
+ * @param mac_dst MAC de destino.
+ */
+unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst);
+
 #endif
