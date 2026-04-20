@@ -7,6 +7,50 @@
 
 #include "funcionesTramas.h"
 
+// unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst){
+    
+// }
+
+bool establecimientoMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
+    bool esclavaAcepta = false;
+    unsigned char *payloadEstablecimiento;
+    payloadEstablecimiento[0] = 'R';
+    payloadEstablecimiento[1] = 0x05; //Valor de control de ENQ
+    payloadEstablecimiento[2] = 0;
+
+    unsigned char *frameEstablecimiento = BuildFrame(iface->MACaddr, mac_dst, type, payloadEstablecimiento);
+    SendFrame(iface, payloadEstablecimiento, 3);
+
+    while(!esclavaAcepta){
+        apacket_t d = ReceiveFrame(iface);
+        cout << d.packet[14] << " PRUEBA" << endl;
+        if(d.packet != nullptr && d.packet[15] == 0x06 && d.packet[12] == (unsigned char)(0x30 + numGrupo)){ //Compruebo si la trama que he recibido contiene la trama de control ACK y proviene de la esclava.
+            esclavaAcepta = true;
+        }
+    }
+
+    return esclavaAcepta;
+}
+
+void establecimientoEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
+    bool reciboEstablecimientoMaestra = false;
+    while(!reciboEstablecimientoMaestra){
+        apacket_t d = ReceiveFrame(iface);
+        if(d.packet != nullptr && d.packet[15] == 0x05 && d.packet[12] == (unsigned char)(0x30 + numGrupo)){
+            reciboEstablecimientoMaestra = true;
+        }
+    }
+    if(reciboEstablecimientoMaestra){
+        unsigned char *payloadAceptacion;
+        payloadAceptacion[0] = 'R';
+        payloadAceptacion[1] = 0x06;  //Valor de control de ACK
+        payloadAceptacion[2] = 0;
+
+        unsigned char *frameAceptacion = BuildFrame(iface->MACaddr, mac_dst, type, payloadAceptacion);
+        SendFrame(iface, payloadAceptacion, 3);
+    }
+}
+
 void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
     char caracter = 0;
     int numCaracteres = 0;
@@ -24,7 +68,7 @@ void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsi
     }
 }
 
-void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
+void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
     printf("Seleccione opción:\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("[F2] - Envío de fichero\n ");
@@ -54,7 +98,9 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
 
                             case 'R':
                                 printf("Has elegido Protocolo de paro y espera\n");
-
+                                if(establecimientoMaestra(iface, mac_dst, type, numGrupo)){
+                                    cout << "ÉXITO" << endl;
+                                };
                             break;
 
                             }
@@ -66,7 +112,7 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
     }
 }
 
-void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
+void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
     printf("Seleccione opción\n ");
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("[F3] - Protocolo de paro y espera\n ");
@@ -91,7 +137,7 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
                                 break;
                             case 'R':
                                 printf("Has elegido Protocolo de paro y espera\n");
-                                
+                                establecimientoEsclava(iface, mac_dst, type, numGrupo);
                                 break;
                             }
                         }
@@ -141,7 +187,7 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
         i++;
     }
     printf("\n");
-    gestionMenuMaestra(iface, macDst, type);
+    gestionMenuMaestra(iface, macDst, type, numGrupo);
 }
 
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo){
@@ -178,9 +224,5 @@ void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo)
     unsigned char * frame = BuildHeader(iface->MACaddr, macDst, type);
     SendFrame(iface, frame, 0);
 
-    gestionMenuEsclava(iface, macDst, type);
-}
-
-unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst){
-    
+    gestionMenuEsclava(iface, macDst, type, numGrupo);
 }
