@@ -7,48 +7,26 @@
 
 #include "funcionesTramas.h"
 
-// unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst){
-    
-// }
-
-bool establecimientoMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
-    bool esclavaAcepta = false;
-    unsigned char *payloadEstablecimiento;
-    payloadEstablecimiento[0] = 'R';
-    payloadEstablecimiento[1] = 0x05; //Valor de control de ENQ
-    payloadEstablecimiento[2] = 0;
-
-    unsigned char *frameEstablecimiento = BuildFrame(iface->MACaddr, mac_dst, type, payloadEstablecimiento);
-    SendFrame(iface, payloadEstablecimiento, 3);
-
-    while(!esclavaAcepta){
-        apacket_t d = ReceiveFrame(iface);
-        cout << d.packet[14] << " PRUEBA" << endl;
-        if(d.packet != nullptr && d.packet[15] == 0x06 && d.packet[12] == (unsigned char)(0x30 + numGrupo)){ //Compruebo si la trama que he recibido contiene la trama de control ACK y proviene de la esclava.
-            esclavaAcepta = true;
-        }
+unsigned char calcularBCE(char *cad){
+    unsigned char res = cad[0];
+    for (int i = 1; i<strlen(cad); i++){
+        res = res ^ cad[i];
     }
-
-    return esclavaAcepta;
+    if(res == 0 || res == 255){
+        res = 1;
+    }
+    return res;
 }
-
-void establecimientoEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo){
-    bool reciboEstablecimientoMaestra = false;
-    while(!reciboEstablecimientoMaestra){
-        apacket_t d = ReceiveFrame(iface);
-        if(d.packet != nullptr && d.packet[15] == 0x05 && d.packet[12] == (unsigned char)(0x30 + numGrupo)){
-            reciboEstablecimientoMaestra = true;
-        }
-    }
-    if(reciboEstablecimientoMaestra){
-        unsigned char *payloadAceptacion;
-        payloadAceptacion[0] = 'R';
-        payloadAceptacion[1] = 0x06;  //Valor de control de ACK
-        payloadAceptacion[2] = 0;
-
-        unsigned char *frameAceptacion = BuildFrame(iface->MACaddr, mac_dst, type, payloadAceptacion);
-        SendFrame(iface, payloadAceptacion, 3);
-    }
+void protocoloParoyEsperaMaestro(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
+    printf("Estás en modo maestro\n");
+    apacket_t recepcion;
+    faseDeEstablecimientoMaestro(iface, mac_dst, type, recepcion);
+    faseDeTransferenciaMestro(iface,mac_dst, type, recepcion);
+    faseDeCierre(iface,mac_dst,type);
+}
+void protocoloParoyEsperaEsclavo(interface_t *iface, unsigned char *type){
+    printf("Estás en modo esclava\n");
+    faseDeEstablecimientoEsclavo(iface, type);
 }
 
 void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
@@ -73,6 +51,7 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
     printf("[F1] - Envío de caracteres interactivo\n ");
     printf("[F2] - Envío de fichero\n ");
     printf("[F3] - Protocolo de paro y espera\n ");
+    printf("[F4] - Introducción de errores durante el protocolo\n ");
     printf("ESC - Salir\n ");
     char car = 0;
     while (car != 27){//Mientras no se pulse ESC
@@ -87,20 +66,21 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
                             switch (car)
                             {
                             case 'P':
-                                printf("Has elegido Envío de caracteres interactivo\n ");
+                                printf("\nHas elegido Envío de caracteres interactivo\n ");
                                 envioInteractivoCaracteres(iface, mac_dst, type);
                             break;
                             
                             case 'Q':
-                                printf("Has elegido Envío de fichero\n ");
-                                enviarFichero(*iface, mac_dst, type);
+                                printf("\nHas elegido Envío de fichero\n ");
+                                enviarFichero(iface, mac_dst,type);
                             break;
 
                             case 'R':
-                                printf("Has elegido Protocolo de paro y espera\n");
-                                if(establecimientoMaestra(iface, mac_dst, type, numGrupo)){
-                                    cout << "ÉXITO" << endl;
-                                };
+                                printf("\nHas elegido Protocolo de paro y espera\n");
+                                // if(establecimientoMaestra(iface, mac_dst, type, numGrupo)){
+                                //     cout << "ÉXITO" << endl;
+                                // };
+                                protocoloParoyEsperaMaestro(iface,mac_dst,type);
                             break;
 
                             }
@@ -132,12 +112,12 @@ void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned cha
                             switch (car)
                             {
                             case 'P':
-                                printf("Has elegido Envío de caracteres interactivo\n ");
+                                printf("\nHas elegido Envío de caracteres interactivo\n ");
                                 envioInteractivoCaracteres(iface, mac_dst, type);
                                 break;
                             case 'R':
-                                printf("Has elegido Protocolo de paro y espera\n");
-                                establecimientoEsclava(iface, mac_dst, type, numGrupo);
+                                printf("\nHas elegido Protocolo de paro y espera\n");
+                                protocoloParoyEsperaEsclavo(iface, type);
                                 break;
                             }
                         }

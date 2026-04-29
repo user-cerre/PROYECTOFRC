@@ -7,20 +7,23 @@
 
 #include "gestionPuerto.h"
 #include "linkLayer.h"
+#include "fases.h"
 #ifndef FUNCIONESTRAMAS_H
 #define FUNCIONESTRAMAS_H
 using namespace std;
 
 /** 
  * @brief Calcula la trama BCE
- * @param iface iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
- * @param mac_dst MAC de destino.
  */
-unsigned char* calcularBCE(interface_t *iface, unsigned char *mac_dst);
+unsigned char calcularBCE(char *cad);
 
-bool establecimientoMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo);
+/**
+ * @brief 
+ */
+//bool establecimientoMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo);
 
-void establecimientoEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo);
+
+
 
 /**
  * @brief Función que implementa el envío de caracteres de forma interactiva. Permite al usuario introducir caracteres por teclado, y cada vez que se introduce un carácter, se envía una trama con ese carácter a la estación destino. Además, la función también recibe tramas de la estación destino, y muestra por pantalla el número de caracteres recibidos cada vez que se recibe una trama. El envío de caracteres se realiza hasta que el usuario pulse la tecla ESC (código ASCII 27).
@@ -63,5 +66,9 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
  * @param numGrupo Número de grupo al que pertenece la estación, que se introduce por teclado al inicio del programa.
  */
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo);
+
+void protocoloParoyEsperaMaestro(interface_t *iface, unsigned char *mac_dst, unsigned char *type);
+
+void protocoloParoyEsperaEsclavo(interface_t *iface, unsigned char *type);
 
 #endif

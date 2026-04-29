@@ -36,7 +36,7 @@ int recibirCaracter(interface_t *iface){
     return i-14;
 }
 
-void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *type){
+void enviarFichero(interface_t *iface, unsigned char *mac_dst, unsigned char *type){
     ifstream file("envio.txt");
     char texto[254];
     unsigned char *trama;
@@ -45,8 +45,8 @@ void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *typ
             file.read(texto, 254);
             if(file.gcount()!= 0){
                 texto[file.gcount()]= '\0';
-                trama = BuildFrame(iface.MACaddr, mac_dst, type, (unsigned char *)texto);
-                SendFrame(&iface, trama, file.gcount());
+                trama = BuildFrame(iface->MACaddr, mac_dst, type, (unsigned char *)texto);
+                SendFrame(iface, trama, file.gcount());
             }
         }
         file.close();
@@ -60,6 +60,54 @@ void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *typ
  * Campo datos variables
  * BCE fijo
  */
-void enviarTramaConErrores(interface_t iface, unsigned char *mac_dst, unsigned char *type){
 
+void mostrarTrama(int control,int tramaN, int direccion){
+    string mostrar = "E ";
+    mostrar += direccion;
+    switch(control){
+        case 04:
+            mostrar+=" EOT ";
+        break;
+        case 05:
+            mostrar+=" ENQ ";
+        break;
+        case 06:
+            mostrar+=" ACK ";
+        break; 
+        case 21:
+            mostrar+=" NACK ";
+        break;
+    }
+    mostrar+=tramaN;
+    cout<<mostrar<<endl;
+}
+
+void enviarTramaDeControl(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion){
+    unsigned char payload[3];
+    payload[0] = direccion;
+    payload[1] = control;
+    payload[2] = tramaN;
+
+    unsigned char *trama = BuildFrame(iface->MACaddr, mac_dst, type, payload);
+    SendFrame(iface, trama, sizeof(payload));
+    mostrarTrama(control,tramaN,direccion);
+    
+    free(trama);
+}
+
+void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud){
+    unsigned char payload [longitud + 5];
+    payload[0] =direccion;
+    payload[1] = control;
+    payload[2] = tramaN;
+    payload[3] = longitud;
+    for(int i = 0; i < longitud; i++){
+        payload[i+4] = (unsigned char) cad[i];
+    }
+
+    payload[longitud + 4] = calcularBCE(cad);
+
+    unsigned char *trama = BuildFrame(iface->MACaddr, mac_dst, type, payload);
+    SendFrame(iface, trama, sizeof(payload));
+    free(trama);
 }

@@ -36,7 +36,7 @@ int recibirCaracter(interface_t *iface);
  * @param mac_dst MAC de destino que se va a usar en la trama.
  * @param type Tipo de la trama que se va a enviar.
  */
-void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *type);
+void enviarFichero(interface_t *iface, unsigned char *mac_dst, unsigned char *type);
 
 
 /**
@@ -46,4 +46,12 @@ void enviarFichero(interface_t iface, unsigned char *mac_dst, unsigned char *typ
  * @param type Tip de trama que se va a enviar.
  */
 void enviarTramaConErrores(interface_t iface, unsigned char *mac_dst, unsigned char *type);
+
+void enviarTramaDeControl(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion);
+
+void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud);
+
+unsigned char calcularBCE(char *cad);
+
+void mostrarTrama(int control,int tramaN, int direccion);
 #endif
