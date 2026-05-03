@@ -44,30 +44,54 @@ void faseDeEstablecimientoEsclavo(interface_t *iface, unsigned char *type){
 void faseDeTransferenciaMestro(interface_t *iface, unsigned char *mac_dst, unsigned char *type, apacket_t &recepcion){//Revisar como unir las fases entre ellas
     char cad[255];
     char tramaN = '0';
-    bool enc = false;
+    char car;
+    bool e = false;
+    char correcto;
     ifstream lectura("EProtoc.txt");
     if(lectura.is_open()){
-        while(!lectura.eof()){
-            lectura.read(cad, 254);
+        while(lectura.read(cad, 254) || lectura.gcount() > 0){
             cad[lectura.gcount()] = '\0';
+
+            if(kbhit()){
+                car = getch();
+                if(car == 27){
+                    if(kbhit()){
+                        car = getch();
+                        if (car == 'O'){
+                            if(kbhit()){
+                                car = getch();
+                                if (car == 'S')//introduccion de errores
+                                cout<<"INTRODUCCION DE ERRORES"<<endl;
+                                e = true;
+                                correcto = cad[0];
+                            }
+                        }
+                    }
+                }
+            }
             if(lectura.gcount() > 0){
-                enviarTramaDeDatos(iface, mac_dst, type, 02, tramaN, 'R', cad, lectura.gcount());
+                enviarTramaDeDatos(iface, mac_dst, type, 02, tramaN, 'R', cad, lectura.gcount(),e);
                 cout<<"E R STX "<<tramaN<<" "<< (int)calcularBCE(cad)<<endl;
-                // cout<<"<<<<<"<<endl;
+                bool enc = false;
+
                 while(!enc){
                     recepcion = ReceiveFrame(iface);
                     if(recepcion.packet != nullptr){
                         if(recepcion.packet[15] == 06 && recepcion.packet[12] == type[0] && recepcion.packet[16] == tramaN && recepcion.packet[13] == 2 && recepcion.packet[14] == 'R'){//ACK, el mismo número de grupo y enviado por el esclavo
                             enc = true;
-                            cout<<"<<<<<<<<<"<<endl;//! ERROR AQUÍ, NUNCA ENTRA SOLO EN EL FINAL
                             cout<<"R R ACK "<<recepcion.packet[16]<<endl;
+                        }else if (recepcion.packet[15] == 21 && recepcion.packet[12] == type[0] && recepcion.packet[16] == tramaN && recepcion.packet[13] == 2 && recepcion.packet[14] == 'R'){
+                            cout<<"R R NACK "<<recepcion.packet[16]<<endl;
+                            e = false;
+                            enviarTramaDeDatos(iface, mac_dst, type, 02, tramaN, 'R', cad, lectura.gcount(),e);
+                            cout<<"E R STX "<<tramaN<<" "<< (int)calcularBCE(cad)<<endl;
                         }
                     }
                 }
-                if(tramaN == '0'){
-                    tramaN = '1';
-                }else{
+                if(tramaN == '1'){
                     tramaN = '0';
+                }else{
+                    tramaN = '1';
                 }
             }
         }
@@ -101,6 +125,8 @@ void faseDeTransferenciaEsclavo(interface_t *iface, unsigned char *mac_dst, unsi
                         }else {
                             tramaN = '0';
                         }
+                    }else{
+                        enviarTramaDeControl(iface, mac_dst, type, 21, tramaN, 'R');//Envío una NACK (21)
                     }
                 }
                 if(recepcion.packet[15] == 04 && recepcion.packet[12] == type[0] && recepcion.packet[13] == 1 && recepcion.packet[14] =='R' && recepcion.packet[16] == '0'){

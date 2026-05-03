@@ -38,18 +38,9 @@ int recibirCaracter(interface_t *iface);
  */
 void enviarFichero(interface_t *iface, unsigned char *mac_dst, unsigned char *type);
 
-
-/**
- * @brief Función que envía las tramas del archivo EProtoc.txt con opcion a inserción de errores.
- * @param iface Interfaz de red que se va a usar para enviar la trama.
- * @param mac_dst MAC de destino que se va a usar en la trama.
- * @param type Tip de trama que se va a enviar.
- */
-void enviarTramaConErrores(interface_t iface, unsigned char *mac_dst, unsigned char *type);
-
 void enviarTramaDeControl(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion);
 
-void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud);
+void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud, bool e);
 
 unsigned char calcularBCE(char *cad);
 

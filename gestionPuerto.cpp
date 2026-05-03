@@ -95,7 +95,7 @@ void enviarTramaDeControl(interface_t *iface, unsigned char *mac_dst, unsigned c
     free(trama);
 }
 
-void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud){
+void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned char *type, int control, char tramaN, char direccion, char *cad, int longitud, bool e){
     unsigned char payload [longitud + 5];
     payload[0] =direccion;
     payload[1] = control;
@@ -107,7 +107,11 @@ void enviarTramaDeDatos(interface_t * iface, unsigned char *mac_dst, unsigned ch
 
     payload[longitud + 4] = calcularBCE(cad);
 
+    if (e){
+        payload[4] = 135;//ç
+    }
     unsigned char *trama = BuildFrame(iface->MACaddr, mac_dst, type, payload);
+
     SendFrame(iface, trama, sizeof(payload));
     free(trama);
 }
