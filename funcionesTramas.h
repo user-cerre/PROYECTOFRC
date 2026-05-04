@@ -12,19 +12,12 @@
 #define FUNCIONESTRAMAS_H
 using namespace std;
 
-/** 
- * @brief Calcula la trama BCE
+/**
+ * @brief Función que calcula el Byte de Control de Error (BCE) a partir de una cadena de caracteres. El BCE se calcula realizando una operación XOR entre todos los caracteres de la cadena, y si el resultado es 0 o 255, se asigna el valor 1 al BCE para evitar que el BCE sea igual a 0 o 255, ya que estos valores podrían causar problemas en la transmisión de las tramas.
+ * @param cad Cadena de caracteres a partir de la cual se va a calcular el BCE.
+ * @return Byte de Control de Error calculado a partir de la cadena de caracteres.
  */
 unsigned char calcularBCE(char *cad);
-
-/**
- * @brief 
- */
-//bool establecimientoMaestra(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo);
-
-
-
-
 /**
  * @brief Función que implementa el envío de caracteres de forma interactiva. Permite al usuario introducir caracteres por teclado, y cada vez que se introduce un carácter, se envía una trama con ese carácter a la estación destino. Además, la función también recibe tramas de la estación destino, y muestra por pantalla el número de caracteres recibidos cada vez que se recibe una trama. El envío de caracteres se realiza hasta que el usuario pulse la tecla ESC (código ASCII 27).
  * @param iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
@@ -32,7 +25,6 @@ unsigned char calcularBCE(char *cad);
  * @param type Tipo de las tramas que se van a enviar, que se construye a partir del número de grupo y la operación que se está ejecutando (en este caso sería 01 para la estación maestra y 02 para la estación esclava).
  */
 void envioInteractivoCaracteres(interface_t *iface, unsigned char *mac_dst, unsigned char *type);
-
 /**
  * @brief Función que implementa el envío de un fichero. Permite al usuario introducir la ruta de un fichero por teclado, y a continuación, lee el contenido del fichero y lo envía a la estación destino en tramas de caracteres. Además, la función también recibe tramas de la estación destino, y muestra por pantalla el número de caracteres recibidos cada vez que se recibe una trama. El envío del fichero se realiza hasta que se hayan enviado todos los caracteres del fichero, o hasta que el usuario pulse la tecla ESC (código ASCII 27).
  * @param iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
@@ -48,8 +40,6 @@ void gestionMenuMaestra(interface_t *iface, unsigned char *mac_dst, unsigned cha
  * @param type Tipo de las tramas que se van a enviar, que se construye a partir del número de grupo y la operación que se está ejecutando (en este caso sería 01 para la estación maestra y 02 para la estación esclava).
  */
 void gestionMenuEsclava(interface_t *iface, unsigned char *mac_dst, unsigned char *type, int numGrupo);
-
-
 /**
  * @brief Función que implementa el protocolo de descubrimiento para la estación maestra. Envía una trama de descubrimiento y espera a recibir una respuesta de la estación esclava. Devuelve la MAC de la estación esclava.
  * @param iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
@@ -66,9 +56,19 @@ void conexionDesdeMaestra(interface_t *iface, unsigned char *mac_dst, unsigned c
  * @param numGrupo Número de grupo al que pertenece la estación, que se introduce por teclado al inicio del programa.
  */
 void conexionDesdeEsclava(interface_t *iface, unsigned char *type, int numGrupo);
-
+/**
+ * @brief Función que implementa el protocolo de paro y espera para la estación maestra. Permite a la estación maestra enviar caracteres de forma interactiva a la estación esclava, y también recibir caracteres de la estación esclava. El envío de caracteres se realiza hasta que el usuario pulse la tecla ESC (código ASCII 27). Además, la función también muestra por pantalla el número de caracteres recibidos cada vez que se recibe una trama, y al finalizar el envío de caracteres, muestra por pantalla el tamaño del fichero recibido (en caso de que se haya enviado un fichero).
+ * @param iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
+ * @param mac_dst MAC de destino a la que se van a enviar las tramas, que se obtiene en el proceso de descubrimiento.
+ * @param type Tipo de las tramas que se van a enviar, que se construye a partir del número de grupo y la operación que se está ejecutando (en este caso sería 01 para la estación maestra y 02 para la estación esclava).
+ */
 void protocoloParoyEsperaMaestro(interface_t *iface, unsigned char *mac_dst, unsigned char *type);
-
+/**
+ * @brief Función que implementa el protocolo de paro y espera para la estación esclava. Permite a la estación esclava enviar caracteres de forma interactiva a la estación maestra, y también recibir caracteres de la estación maestra. El envío de caracteres se realiza hasta que el usuario pulse la tecla ESC (código ASCII 27). Además, la función también muestra por pantalla el número de caracteres recibidos cada vez que se recibe una trama, y al finalizar el envío de caracteres, muestra por pantalla el tamaño del fichero recibido (en caso de que se haya enviado un fichero).
+ * @param iface Puntero a la interfaz de red que se va a usar para enviar y recibir las tramas.
+ * @param type Tipo de las tramas que se van a enviar, que se construye a partir del número de grupo y la operación que se está ejecutando (en este caso sería 02 para la estación esclava).
+ * @param numGrupo Número de grupo al que pertenece la estación, que se introduce por teclado al inicio del programa.
+ */
 void protocoloParoyEsperaEsclavo(interface_t *iface, unsigned char *type);
 
 #endif
