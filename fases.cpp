@@ -32,6 +32,7 @@ void faseDeEstablecimientoEsclavo(interface_t *iface, unsigned char *type){
                     }
                     enviarTramaDeControl(iface, mac_dst, type, 06, '0', 'R');
 
+                    cout << endl;
                     //Aquí va la transferencia de esclavo
                     faseDeTransferenciaEsclavo(iface, mac_dst, type, car);
                 }
@@ -130,11 +131,13 @@ void faseDeTransferenciaEsclavo(interface_t *iface, unsigned char *mac_dst, unsi
                     }
                 }
                 if(recepcion.packet[15] == 04 && recepcion.packet[12] == type[0] && recepcion.packet[13] == 1 && recepcion.packet[14] =='R' && recepcion.packet[16] == '0'){
+                    cout << endl;
                     cout<<"R R EOT 0"<<endl;
                     enc = true;
                     escritura.close();
                     enviarTramaDeControl(iface, mac_dst, type, 06, '0', 'R');
                     car = 27;
+                    cout << "Fin de Seleccion por parte del Esclavo" << endl;
                 }
             }
         }
@@ -151,6 +154,7 @@ void faseDeCierre(interface_t *iface, unsigned char *mac_dst, unsigned char *typ
             if(recepcion.packet[15] == 06 && recepcion.packet[12] == type[0] && recepcion.packet[16] == '0' && recepcion.packet[13] == 2 && recepcion.packet[14] == 'R'){//ACK, el mismo número de grupo y enviado por el esclavo
                 enc = true;
                 cout<<"R R ACK "<<recepcion.packet[16]<<endl;
+                cout << "Fin de Seleccion por parte del Maestro" << endl;
             }
         }
     }

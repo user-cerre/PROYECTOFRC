@@ -21,7 +21,9 @@ void protocoloParoyEsperaMaestro(interface_t *iface, unsigned char *mac_dst, uns
     printf("Estás en modo maestro\n");
     apacket_t recepcion;
     faseDeEstablecimientoMaestro(iface, mac_dst, type, recepcion);
+    cout << endl;
     faseDeTransferenciaMestro(iface,mac_dst, type, recepcion);
+    cout << endl;
     faseDeCierre(iface,mac_dst,type);
 }
 void protocoloParoyEsperaEsclavo(interface_t *iface, unsigned char *type){
