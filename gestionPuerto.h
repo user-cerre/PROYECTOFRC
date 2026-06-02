@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include "linkLayer.h"
+#include "funcionesTramas.h"
 #ifndef GESTIONPUERTO_H
 #define GESTIONPUERTO_H
 using namespace std;
